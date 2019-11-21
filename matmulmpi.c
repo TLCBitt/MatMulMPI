@@ -8,7 +8,9 @@ int main(int argc, char* argv[])
 {
     int max, seed, size;
     int my_rank, world_size, workers;
-    int dest, source, rows, rowsDiv, rowsEx, offset;
+    int rows, rowsDiv, rowsEx;
+    int balance;
+    int target, origin;
     int i, j, k;
     MPI_Status status;
 
@@ -59,12 +61,12 @@ int main(int argc, char* argv[])
 
         rowsDiv = size / workers;   // To divide work among rows
         rowsEx = size % workers;    // Excess row work
-        offset = 0;
+        balance = 0;
 
-        for (dest = 1; dest <= workers; dest++)
+        for (target = 1; target <= workers; target++)
         {
             // Divide work amongst rows
-            if(dest <= rowsEx)
+            if(target <= rowsEx)
             {
                 rows = rowsDiv + 1;
             }
@@ -73,19 +75,19 @@ int main(int argc, char* argv[])
                 rows = rowsDiv;
             }
 
-            MPI_Send(&offset, 1, MPI_INT, dest, 1, MPI_COMM_WORLD);
-            MPI_Send(&rows, 1, MPI_INT, dest, 1, MPI_COMM_WORLD);
-            MPI_Send(&matrixOne[offset][0], rows * size, MPI_INT, dest, 1, MPI_COMM_WOR$
+            MPI_Send(&balance, 1, MPI_INT, target, 1, MPI_COMM_WORLD);
+            MPI_Send(&rows, 1, MPI_INT, target, 1, MPI_COMM_WORLD);
+            MPI_Send(&matrixOne[balance][0], rows * size, MPI_INT, target, 1, MPI_COMM_WORLD);
             MPI_Send(&matrixTwo, size * size, MPI_INT, dest, 1, MPI_COMM_WORLD);
-            offset = offset + rows;
+            balance = balance + rows;
         }
 
         for (i = 1; i <= workers; i++)
         {
-            source = i;
-            MPI_Recv(&offset, 1, MPI_INT, source, 2, MPI_COMM_WORLD, &status);
-            MPI_Recv(&rows, 1, MPI_INT, source, 2, MPI_COMM_WORLD, &status);
-            MPI_Recv(&matrixThree[offset][0], rows * size, MPI_INT, source, 2, MPI_COMM$
+            origin = i;
+            MPI_Recv(&balance, 1, MPI_INT, origin, 2, MPI_COMM_WORLD, &status);
+            MPI_Recv(&rows, 1, MPI_INT, origin, 2, MPI_COMM_WORLD, &status);
+            MPI_Recv(&matrixThree[balance][0], rows * size, MPI_INT, origin, 2, MPI_COMM_WORLD, &status);
 
         }
 
@@ -128,7 +130,7 @@ int main(int argc, char* argv[])
 
     if (my_rank > 0)
     {
-        MPI_Recv(&offset, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
+        MPI_Recv(&balance, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
         MPI_Recv(&rows, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
         MPI_Recv(&matrixOne, rows * size, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
         MPI_Recv(&matrixTwo, size * size, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
@@ -140,12 +142,12 @@ int main(int argc, char* argv[])
                 matrixThree[i][k] = 0;
                 for (j = 0; j < size; j++)
                 {
-                    matrixThree[i][k] = matrixThree[i][k] + matrixOne[i][j] * matrixTwo$
+                    matrixThree[i][k] = matrixThree[i][k] + matrixOne[i][j] * matrixTwo[j][k];
                 }
             }
         }
 
-        MPI_Send(&offset, 1, MPI_INT, 0, 2, MPI_COMM_WORLD);
+        MPI_Send(&balance, 1, MPI_INT, 0, 2, MPI_COMM_WORLD);
         MPI_Send(&rows, 1, MPI_INT, 0, 2, MPI_COMM_WORLD);
         MPI_Send(&matrixThree, rows * size, MPI_INT, 0, 2, MPI_COMM_WORLD);
     }
