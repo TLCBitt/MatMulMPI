@@ -3,15 +3,22 @@
 #include <stdlib.h>
 
 // num rows and columns
-#define MAX 4
 
-int matrixOne[MAX][MAX];
-int matrixTwo[MAX][MAX];
-int matrixThree[MAX][MAX];
-
-
-int main()
+int main(int argc, char *argv[])
 {
+	int max = atoi(argv[1]);
+	int seed = atoi(argv[2]);
+	int size = atoi(argv[3]);
+
+	srand(seed);
+
+	//int **matrixOne = (int **) malloc(sizeof(int *) * size);
+	//int **matrixTwo = (int **) malloc(sizeof(int *) * size);
+	//int **matrixThree = (int **) malloc(sizeof(int *) * size);
+
+	int matrixOne[size][size];
+	int matrixTwo[size][size];
+	int matrixThree[size][size];
 
     MPI_Status status;
 
@@ -29,22 +36,22 @@ int main()
 
     if(my_rank == 0)
     {
-        for(i = 0; i < MAX; i++)
-            for(j = 0; j < MAX; j++)
+        for(i = 0; i < size; i++)
+            for(j = 0; j < size; j++)
                 matrixOne[i][j] = i + j;
-        for(i = 0; i < MAX; i++)
-            for(j = 0; j < MAX; j++)
+        for(i = 0; i < size; i++)
+            for(j = 0; j < size; j++)
                 matrixTwo[i][j] = i * j;
 
     //rows = MAX/workers;
-    rows = MAX;
+    rows = size;
     offset=0;
   for(dest = 1; dest <=  workers; dest++)
     {
         MPI_Send(&offset, 1, MPI_INT, dest, 1, MPI_COMM_WORLD);
         MPI_Send(&rows, 1, MPI_INT, dest, 1, MPI_COMM_WORLD);
-        MPI_Send(&matrixOne[offset][0], rows*MAX, MPI_INT, dest, 1, MPI_COMM_WORLD);
-        MPI_Send(&matrixTwo, MAX*MAX, MPI_INT, dest, 1, MPI_COMM_WORLD);
+        MPI_Send(&matrixOne[offset][0], rows*size, MPI_INT, dest, 1, MPI_COMM_WORLD);
+        MPI_Send(&matrixTwo, size*size, MPI_INT, dest, 1, MPI_COMM_WORLD);
         offset = offset + rows;
     }
 
@@ -53,17 +60,40 @@ int main()
         source = i;
         MPI_Recv(&offset, 1, MPI_INT, source, 2, MPI_COMM_WORLD, &status);
         MPI_Recv(&rows, 1, MPI_INT, source, 2, MPI_COMM_WORLD, &status);
-        MPI_Recv(&matrixThree[offset][0], rows*MAX, MPI_INT, source, 2, MPI_COMM_WORLD, &status);
+        MPI_Recv(&matrixThree[offset][0], rows*size, MPI_INT, source, 2, MPI_COMM_WORLD, &status);
 
     }
 
+	//print matrixOne
+	printf("Matrix One: \n");
+	for(int i = 0; i < size; ++i)
+	{
+		for(int j = 0; j < size; ++j)
+		{
+			printf("%4d ", matrixOne[i][j]);
+		}
+		printf("\n");
+	}
+	printf("\n");
+
+	//print matrixTwo
+	printf("Matrix Two: \n");
+	for(int i = 0; i < size; ++i)
+	{
+		for(int j = 0; j < size; ++j)
+		{
+			printf("%4d ", matrixTwo[i][j]);
+		}
+		printf("\n");
+	}
+	printf("\n");
 
 
     // print matrixThree
     printf("Multiplied Matrix Result: \n");
-    for(i = 0; i < MAX; i++)
+    for(i = 0; i < size; i++)
     {
-        for(j = 0; j < MAX; j++)
+        for(j = 0; j < size; j++)
         {
             printf("%d ", matrixThree[i][j]);
         }
@@ -76,14 +106,14 @@ int main()
 
         MPI_Recv(&offset, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
         MPI_Recv(&rows, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
-        MPI_Recv(&matrixOne, rows*MAX, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
-        MPI_Recv(&matrixTwo, MAX*MAX, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
+        MPI_Recv(&matrixOne, rows*size, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
+        MPI_Recv(&matrixTwo, size*size, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
 
-        for(k = 0; k < MAX; k++)
+        for(k = 0; k < size; k++)
             for(i = 0; i < rows; i++)
             {
                 matrixThree[i][k] = 0;
-                for(j = 0; j < MAX; j++)
+                for(j = 0; j < size; j++)
                 {
                     matrixThree[i][k] = matrixThree[i][k] + matrixOne[i][j] * matrixTwo[j][k];
                 }
@@ -91,7 +121,7 @@ int main()
 
         MPI_Send(&offset, 1, MPI_INT, 0, 2, MPI_COMM_WORLD);
         MPI_Send(&rows, 1, MPI_INT, 0, 2, MPI_COMM_WORLD);
-        MPI_Send(&matrixThree, rows*MAX, MPI_INT, 0, 2, MPI_COMM_WORLD);
+        MPI_Send(&matrixThree, rows*size, MPI_INT, 0, 2, MPI_COMM_WORLD);
     }
 
 
