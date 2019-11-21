@@ -2,7 +2,7 @@
 #include <mpi.h>
 #include <stdlib.h>
 
-// num rows and columns
+
 
 int main(int argc, char* argv[])
 {
