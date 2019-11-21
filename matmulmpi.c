@@ -14,8 +14,8 @@ int main(int argc, char* argv[])
 
 	if (argc != 4)
 	{
-		printf("Please include the max, seed, and size values in the parameters.");
-		printf("Exiting.");
+		printf("Please include the max, seed, and size values in the parameters.\n");
+		printf("Exiting.\n");
 		return 0;
 	}
 
@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
 		{
 			for (j = 0; j < size; j++)
 			{
-				printf("%d ", matrixThree[i][j]);
+				printf("%4d ", matrixThree[i][j]);
 			}
 			printf("\n");
 		}
