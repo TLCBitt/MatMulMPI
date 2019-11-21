@@ -6,9 +6,22 @@
 
 int main(int argc, char* argv[])
 {
-	int max = atoi(argv[1]);
-	int seed = atoi(argv[2]);
-	int size = atoi(argv[3]);
+	int max, seed, size;
+	int my_rank, world_size, workers;
+	int dest, source, rows, offset;
+	int i, j, k;
+	MPI_Status status;
+
+	if (argc != 4)
+	{
+		printf("Please include the max, seed, and size values in the parameters.");
+		printf("Exiting.");
+		return 0;
+	}
+
+	max = atoi(argv[1]);
+	seed = atoi(argv[2]);
+	size = atoi(argv[3]);
 
 	srand(seed);
 
@@ -20,14 +33,6 @@ int main(int argc, char* argv[])
 	int matrixTwo[size][size];
 	int matrixThree[size][size];
 
-	MPI_Status status;
-
-	int my_rank;
-	int world_size;
-	int workers;
-	int dest, source, rows, offset;
-	int i, j, k;
-
 	MPI_Init(NULL, NULL);
 	MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &world_size);
@@ -38,10 +43,10 @@ int main(int argc, char* argv[])
 	{
 		for (i = 0; i < size; i++)
 			for (j = 0; j < size; j++)
-				matrixOne[i][j] = i + j;
+				matrixOne[i][j] = rand() % (max + 1);
 		for (i = 0; i < size; i++)
 			for (j = 0; j < size; j++)
-				matrixTwo[i][j] = i * j;
+				matrixTwo[i][j] = rand() % (max + 1);
 
 		//rows = MAX/workers;
 		rows = size;
@@ -126,4 +131,6 @@ int main(int argc, char* argv[])
 	}
 
 	MPI_Finalize();
+
+	return 0;
 }
