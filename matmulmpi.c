@@ -17,6 +17,7 @@ int main(int argc, char* argv[])
     if (argc != 4)
     {
         printf("Please include the max, seed, and size values in the parameters.\n");
+        printf("Usage: matmulmpi <max> <seed> <matrix size>.\n");
         printf("Exiting.\n");
         return 0;
     }
