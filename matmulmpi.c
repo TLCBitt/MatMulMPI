@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
             MPI_Send(&balance, 1, MPI_INT, target, 1, MPI_COMM_WORLD);
             MPI_Send(&rows, 1, MPI_INT, target, 1, MPI_COMM_WORLD);
             MPI_Send(&matrixOne[balance][0], rows * size, MPI_INT, target, 1, MPI_COMM_WORLD);
-            MPI_Send(&matrixTwo, size * size, MPI_INT, dest, 1, MPI_COMM_WORLD);
+            MPI_Send(&matrixTwo, size * size, MPI_INT, target, 1, MPI_COMM_WORLD);
             balance = balance + rows;
         }
 
