@@ -7,17 +7,17 @@ MatMulMPI is a C-program implementing MPI to multiply two matrices with randomly
 Within the MatMulMPI directory:
 
 ```bash
-mpicc matmulmpi.c
+make
 ```
 
 ## Run
 
 ```bash
-mpirun -np processes a.out max seed size
+mpirun -np processes matmulmpi max seed size
 ```
 
 ### Example Run
 
 ```bash
-mpirun -np 5 a.out 10 15 4
+mpirun -np 5 matmulmpi 10 15 4
 ```
